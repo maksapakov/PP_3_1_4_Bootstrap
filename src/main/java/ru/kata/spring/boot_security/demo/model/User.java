@@ -5,9 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -17,50 +15,73 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "surname")
-    private String surname;
-
-    @Column(name = "age")
-    private Integer age;
-
-    @Column(name = "email", unique = true)
-    private String email;
-
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(name = "username")
     private String username;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
-    @ElementCollection(targetClass = Role.class)
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
-    @Enumerated(EnumType.STRING)
-    private Set<Role> roles = new HashSet<>();
+    @Column(name = "city")
+    private String city;
 
+    @Column(name = "phone")
+    private String phone;
 
-    public User() {
-    }
+    @Column(name = "email")
+    private String email;
 
+    @ManyToMany(fetch=FetchType.LAZY)
+    @JoinTable(name="users_roles",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    private List<Role> roles;
 
-    public User(String name, String surname, Integer age, String email, String username, String password) {
-        this.name = name;
-        this.surname = surname;
-        this.age = age;
-        this.email = email;
-        this.username = username;
+    public User() {}
+
+    public User(String userName, String password, String city, String phone, String email, List<Role> roles) {
+        this.username = userName;
         this.password = password;
+        this.city = city;
+        this.phone = phone;
+        this.email = email;
+        this.roles = roles;
     }
 
-    public void addRole(Role role) {
-        this.roles.add(role);
+    public User(Long id, String userName, String password, String city, String phone, String email, List<Role> roles) {
+        this.id = id;
+        this.username = userName;
+        this.password = password;
+        this.city = city;
+        this.phone = phone;
+        this.email = email;
+        this.roles = roles;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setUsername(String userName) {
+        this.username = userName;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        return getRoles();
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
     }
 
     @Override
@@ -83,69 +104,54 @@ public class User implements UserDetails {
         return true;
     }
 
-    public Long getId() {
-        return id;
+    public String getCity() {
+        return city;
     }
 
-    public String getName() {
-        return name;
+    public void setCity(String city) {
+        this.city = city;
     }
 
-    public String getSurname() {
-        return surname;
+    public String getPhone() {
+        return phone;
     }
 
-    public Integer getAge() {
-        return age;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
+    public String getEmail() {
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", city='" + city + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", roles=" + getRoles() +
+                '}';
     }
 }
+
