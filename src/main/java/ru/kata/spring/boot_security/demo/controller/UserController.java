@@ -16,6 +16,16 @@ public class UserController {
         this.userDao = userDao;
     }
 
+    @GetMapping("/")
+    public String home (){
+        return "index";
+    }
+
+    @GetMapping("/login")
+    public String login(){
+        return "login";
+    }
+
     @GetMapping(value = "/user")
     public String print(ModelMap model, Principal principal) {
         User userDaoByName = userDao.findByName(principal.getName());

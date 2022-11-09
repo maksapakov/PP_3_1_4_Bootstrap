@@ -24,19 +24,18 @@
     <label for="email">Email</label>
     <input type="text" th:field="*{email}" id="email" placeholder="Email">
     <br/>
-    <!--                    <ul>-->
+
     <th:block th:each="msg : ${user.getRoles()}">
         <li th:text="${msg.getNoPrefix()}"></li>
     </th:block>
-    <!--                    </ul>-->
+
     <p>
         <label>Roles
             <input type="checkbox" name="roleList"
                    th:each="rol : ${roleList}"
                    th:text="${rol.getNoPrefix()}"
                    th:value="${rol.role}"
-                   th:field="*{roles}"
-            />
+                   th:field="*{roles}"/>
         </label>
     </p>
 
