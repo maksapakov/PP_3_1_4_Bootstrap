@@ -6,6 +6,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
 import java.security.Principal;
@@ -16,11 +18,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
+    private final RoleService roleService;
 
     @Autowired
-    public AdminController(UserServiceImpl userService) {
+    public AdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
+        this.roleService = roleService;
     }
 
     @GetMapping("/edit")
@@ -31,8 +35,9 @@ public class AdminController {
 
     @PostMapping("/edite")
     public String editUser(User user) {
-        List<String> listS = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
-        List<Role> listR = userService.listByRole(listS);
+        List<String> listS = user.getRoles().stream().map(r -> r.getRole())
+                .collect(Collectors.toList());
+        Set<Role> listR = roleService.listByRole(listS);
         user.setRoles(listR);
         userService.update(user);
         return "redirect:/admin/edit";
@@ -42,7 +47,7 @@ public class AdminController {
     public String updateUser(@PathVariable("id") Long id, Model model) {
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        model.addAttribute("roleList", userService.listRoles());
+        model.addAttribute("roleList", roleService.listRoles());
         return "edite";
     }
 
@@ -63,13 +68,13 @@ public class AdminController {
         model.addAttribute("messages", user);
         model.addAttribute("use", new User());
         model.addAttribute("users", userService.listUsers());
-        model.addAttribute("roleList", userService.listRoles());
+        model.addAttribute("roleList", roleService.listRoles());
         return "users";
     }
 
     @GetMapping("/create")
     public String createUserForm(User user, Model model) {
-        model.addAttribute("roleList", userService.listRoles());
+        model.addAttribute("roleList", roleService.listRoles());
         return "create";
     }
 
@@ -77,7 +82,7 @@ public class AdminController {
     public String createUser(User user) {
         if(user.getRoles() != null) {
            List<String> listS = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
-           List<Role> listR = userService.listByRole(listS);
+           Set<Role> listR = roleService.listByRole(listS);
            user.setRoles(listR);
         }
         userService.add(user);
@@ -94,7 +99,7 @@ public class AdminController {
     public String updateUserForm(@PathVariable("id") Long id, Model model) {
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        model.addAttribute("roleList", userService.listRoles());
+        model.addAttribute("roleList", roleService.listRoles());
         return "update";
     }
 
@@ -102,7 +107,7 @@ public class AdminController {
     public String updateUser(User user) {
         if(user.getRoles() != null) {
             List<String> listS = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
-            List<Role> listR = userService.listByRole(listS);
+            Set<Role> listR = roleService.listByRole(listS);
             user.setRoles(listR);
             userService.update(user);
         }

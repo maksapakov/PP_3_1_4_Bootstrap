@@ -9,51 +9,36 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.dao.RoleDaoImpl;
-import ru.kata.spring.boot_security.demo.dao.UserDaoImpl;
+import ru.kata.spring.boot_security.demo.dao.RoleDao;
+import ru.kata.spring.boot_security.demo.dao.UserDao;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+
 public class UserServiceImpl implements UserService {
 
-    private final RoleDaoImpl roleDao;
-    private final UserDaoImpl userDao;
+    private final UserDao userDao;
+    private final RoleDao roleDao;
 
     public PasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder(8);
     }
 
     @Autowired
-    public UserServiceImpl(RoleDaoImpl roleDao, UserDaoImpl userDao) {
+    public UserServiceImpl(RoleDao roleDao, UserDao userDao) {
         this.roleDao = roleDao;
         this.userDao = userDao;
     }
 
-    public boolean addRole(Role role) {
-        Role userPrimary = roleDao.findByName(role.getRole());
-        if(userPrimary != null) {return false;}
-        roleDao.add(role);
-        return true;
-    }
 
-    public Role findByNameRole(String name) { return roleDao.findByName(name); }
 
-    public List<Role> listRoles() { return roleDao.listRoles(); }
-
-    public Role findByIdRole(Long id) {
-        return roleDao.findByIdRole(id);
-    }
-
-    public List<Role> listByRole(List<String> name) {
-        return roleDao.listByName(name);
-    }
-
+    @Transactional
     public boolean add(User user) {
         User userPrimary = userDao.findByName(user.getUsername());
         if(userPrimary != null) {return false;}
@@ -66,10 +51,12 @@ public class UserServiceImpl implements UserService {
         return userDao.listUsers();
     }
 
+    @Transactional
     public void delete(Long id) {
         userDao.delete(id);
     }
 
+    @Transactional
     public void update(User user) {
         User userPrimary = findById(user.getId());
         System.out.println(userPrimary);
@@ -88,18 +75,21 @@ public class UserServiceImpl implements UserService {
         return userDao.findByName(userName);
     }
 
+/*
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User userPrimary = findByUsername(username);
-        if (userPrimary == null) {
+    public UserDetails loadUserByUsername(String username) {
+        Optional<User> userPrimary = Optional.ofNullable(userDao.findByName(username));
+        if (!userPrimary.isPresent()) {
             throw new UsernameNotFoundException(username + " not found");
         }
-        UserDetails user = new org.springframework.security.core.userdetails.User(userPrimary.getUsername(), userPrimary.getPassword(), ath(userPrimary.getRoles()));
-        return userPrimary;
+        UserDetails user = new org.springframework.security.core.userdetails.User(userPrimary.get().getUsername(),
+                userPrimary.get().getPassword(), ath(userPrimary.get().getRoles()));
+        return userPrimary.get();
     }
 
     private Collection<? extends GrantedAuthority> ath(Collection<Role> roles) {
         return roles.stream().map(r -> new SimpleGrantedAuthority(r.getRole()))
                 .collect(Collectors.toList());
     }
+*/
 }
