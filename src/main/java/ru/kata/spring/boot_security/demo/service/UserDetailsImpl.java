@@ -30,13 +30,6 @@ public class UserDetailsImpl implements UserDetailsService {
         if (!userPrimary.isPresent()) {
             throw new UsernameNotFoundException(username + " not found");
         }
-        UserDetails user = new org.springframework.security.core.userdetails.User(userPrimary.get().getUsername(),
-                userPrimary.get().getPassword(), ath(userPrimary.get().getRoles()));
         return userPrimary.get();
-    }
-
-    private Collection<? extends GrantedAuthority> ath(Collection<Role> roles) {
-        return roles.stream().map(r -> new SimpleGrantedAuthority(r.getRole()))
-                .collect(Collectors.toList());
     }
 }

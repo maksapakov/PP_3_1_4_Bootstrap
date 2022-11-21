@@ -3,15 +3,15 @@ package ru.kata.spring.boot_security.demo.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot_security.demo.model.Role;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
-import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
 import java.security.Principal;
-import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -35,10 +35,7 @@ public class AdminController {
 
     @PostMapping("/edite")
     public String editUser(User user) {
-        List<String> listS = user.getRoles().stream().map(r -> r.getRole())
-                .collect(Collectors.toList());
-        Set<Role> listR = roleService.listByRole(listS);
-        user.setRoles(listR);
+        getUserRole(user);
         userService.update(user);
         return "redirect:/admin/edit";
     }
@@ -47,7 +44,6 @@ public class AdminController {
     public String updateUser(@PathVariable("id") Long id, Model model) {
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        model.addAttribute("roleList", roleService.listRoles());
         return "edite";
     }
 
@@ -80,11 +76,7 @@ public class AdminController {
 
     @PostMapping("/create")
     public String createUser(User user) {
-        if(user.getRoles() != null) {
-           List<String> listS = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
-           Set<Role> listR = roleService.listByRole(listS);
-           user.setRoles(listR);
-        }
+        getUserRole(user);
         userService.add(user);
         return "redirect:/admin";
     }
@@ -105,13 +97,14 @@ public class AdminController {
 
     @PostMapping("update")
     public String updateUser(User user) {
-        if(user.getRoles() != null) {
-            List<String> listS = user.getRoles().stream().map(r -> r.getRole()).collect(Collectors.toList());
-            Set<Role> listR = roleService.listByRole(listS);
-            user.setRoles(listR);
-            userService.update(user);
-        }
+        getUserRole(user);
         userService.update(user);
         return "redirect:/admin";
+    }
+
+    public void getUserRole(User user) {
+        user.setRoles(user.getRoles().stream()
+                .map(role -> roleService.findByNameRole(role.getRole()))
+                .collect(Collectors.toSet()));
     }
 }
